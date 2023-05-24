@@ -1,2 +1,6 @@
-# algorithms-for-games
-A port of my KA contest winner
+# Algorithms for Games
+This is a direct port of a contest winning tutoiral page I wrote on [Khan Academy](https://www.khanacademy.org/cs/)
+
+You can view the Github (read working) version [here](https://hsstudent16.github.io/game-algorithms/)
+
+Or, if you really want, you can view the original Khan Academy file [here](https://www.khanacademy.org/cs/i/4752460868534272)
