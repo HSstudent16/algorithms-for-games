@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<!--
+                Contest: Teach a CS Concept
+
+           I have completed 101% of Khan Academy's 
+         'Intro to HTML' and have been programming 
+                     for 62-ish months.
+
+            I would prefer to be placed in the
+                  [  A D V A N C E D  ]
+                        bracket
+   
+  NOTES:
+    If you look in the explanation pages' code, you'll
+    find something that looks like this:
+
+  <canvas data-theme = "..." data-code = "..."></canvas>
+
+    These canvses are processed in a script that handles
+    the graphics & demos for this webpage.  It's kind
+    of a mini-API I created that allows me to create
+    themed graphics whenever I need to, using a simple
+    command system in `data-code`.
+
+    Lines 2165-2218 of /cs/i/5706003536461824 handle this.
+    
+  JUDGES:
+    To reduce the size of this file, I have moved the main
+    scripts to PJS programs.  They are loaded via the API,
+    and (at the guidance of Evan Lewis) I have pasted the
+    links here so that they may be reviewed.
+    
+    Syntax Highlighter -
+      https://www.khanacademy.org/cs/i/4554512221126656
+    
+    Event & Animation Manager -
+      https://www.khanacademy.org/cs/i/4870165490614272
+    
+    Visualization & Interactive Manager -
+      https://www.khanacademy.org/cs/i/5706003536461824
+    
+  CREDITS:
+    See the "about" page 
+    
+-->
+<html>
+  <head>
+  
+    <!-- 
+      This is something I picked up at w3schools.com; it
+      makes the page look good on a mobile device
+    -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A CS Concept - Final Edition</title>
+
+    <!-- All the CSS in this program -->
+    <style>
+    /* Generic styles */
+      body {
+        background: #dff;
+        padding: 0;
+        margin: 0;
+        font-family: sans-serif;
+      }
+    /* Link styles */
+      a{
+        color: #055;
+        text-decoration: none;
+      }
+      a:hover{
+        color: #022;
+        text-decoration: underline;
+      }
+      
+      
+    /* Page Management & Styles */
+      .page {
+        display: none;
+        padding: 10px;
+        margin: 8px auto;
+        box-sizing: border-box;
+        font-size: 1.1em;
+        min-height: 100vh;
+        max-width: 800px;
+        background: white;
+      }
+      .page.active {
+        display: block;
+      }
+    /* This manages overflow & centers graphics */
+      .page canvas, .page img,
+      .page table, #to-first-page {
+        margin: auto;
+        display: block;
+        max-width: 500px;
+      }
+    /* 
+      Make the list indent responsive.  On KA, this has a
+      huge effect on whitespace
+    */
+      .page ul {
+        padding-inline-start: 5vw;
+      }
+    /* Some cursive for when I got bored */
+      .page .mythoughts {
+        font-family: 'Comic Sans', cursive;
+        font-style:oblique;
+        padding-left: 5vw;
+      }
+    /* A big blue button */
+      #to-first-page {
+        padding: 15px;
+        background-color: #00f;
+        color: white;
+        font-size: 1.5em;
+        border-radius: 5pt;
+        border: none;
+        margin: 50px auto;
+        cursor: pointer;
+      }
+      
+      
+    /* Header and Footer Styles */ 
+      header, footer {
+        background: #333;
+        color: white;
+        margin: 0;
+        display: block;
+        padding: 10px 5%;
+      }
+      footer {
+        text-align: center;
+      }
+    /* 
+      Footer positioning to make it look good on
+      screens of all sizes.
+    */
+      footer a, footer a:hover{
+        color: aqua;
+      }
+      #footer-text, #logo {
+        display: inline;
+      }
+      #logo {
+        height: 3em;
+        margin: 0 10px;
+        vertical-align: middle;
+      }
+    
+
+    /* Navigation Styles */
+      nav {
+        background-color: white;
+        box-shadow: black 0 5px 5px -5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        padding: 2px;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0;
+      }      
+    /* 
+      There are some random comments here to trick Oh Noes
+      out of thinking my code is bad :P
+    */
+      /**/
+      @media screen and (max-width: 400px) {
+      /*}*/
+        nav {
+          flex-direction: column;
+        }
+      }      
+    /* More navigation styles */
+      nav.sticky {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+      }
+      nav > * {
+        margin: 0px 10px;
+      }
+    /* Dropdown menu styles */
+      .nav-dd .nav-dd-menu{
+        position: absolute;
+        background: white;
+        margin-top: 2px;
+        padding: 5px;
+        opacity: 0;
+        visibility: hidden;
+        transition: all ease .5s;
+        box-shadow: black 0 4px 5px 0;
+        border-radius: 0 0 5px 5px;
+      }
+      .nav-dd-menu * {
+        display: block;
+        margin: 5px;
+      }
+      .nav-dd:hover .nav-dd-menu {
+        visibility: visible;
+        opacity: 0.9;
+      }
+    
+
+    /* 
+      Navigation buttons -- the arrows & house
+      at the top & bottom of the pages
+    */ 
+      .nav-arrow-wrapper {
+        display: flex;
+        padding: 2px;
+        justify-content: space-between;
+      }
+      .arrow-left::before,
+      .arrow-right::after {
+        content: " ";
+        transform: rotate(-45deg);
+        margin: 2px;
+        width: 5px;
+        height: 5px;
+        display: inline-block;
+      }      
+      .arrow-left::before {
+        border-top: solid #077 2px;
+        border-left: solid #077 2px;
+      }
+      .arrow-right::after {
+        border-right: solid #077 2px;
+        border-bottom: solid #077 2px;
+      }      
+      .home-left::before, .home-right::after {
+        content: " ";
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        /* 
+          The thumbnail of a program of mine.  I discovered that this is
+          a great way to store graphics.
+        */
+        background-image: url("https://www.khanacademy.org/computer-programming/api/4870165490614272/latest.png");
+        background-size: cover;
+        margin: 0 5px;
+      }
+
+
+    /* The big blue welcome screen */
+      #welcome-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #0d0d72;
+        color: white;
+        opacity: 1;
+        visibility: visible;
+        transition: opacity ease 1s, visibility ease 1s;
+      }
+      #welcome-overlay #title-wrapper {
+        font-size: 3vh;
+        margin: 5vw;
+        text-align: center;
+      }
+    /* The buttons on that screen */
+      #begin, #new-tab {
+        border-radius: 10px 0 0 10px;
+        padding: 10px;
+        background-color: transparent;
+        color: #dff;
+        font-size: 1.2em;
+        border: solid #dff 2px;
+        transition: all ease 0.2s;
+        margin: 0;
+      }
+      #new-tab {
+        border-radius: 0 10px 10px 0;
+      }
+      #new-tab:hover,
+      #begin:hover {
+        background-color: #dff;
+        color: #0d0d72;
+        text-decoration: none;
+      }
+    
+    /* 
+      Syntax-highlighted elements.
+      Includes all <code> tags.
+    */
+      .highlighted, code {
+        font-family: monospace;
+        color: #000000;
+        background: #f0f0f0;
+        border-radius: 2px;
+        padding: 2px;
+      }
+      .highlighted {
+        padding: 10px;
+        font-size: 10pt;
+        white-space: pre;
+        line-height: 1.15;
+        margin: auto;
+        display: block;
+        overflow-x: auto;
+        width: 80%;
+      }
+    </style>
+    
+  </head>
+  <body>
+  
+    <!--
+      IMPORTANT!
+        The tutorials are divided into four pages each.
+        
+        The first page contains an introduction paragraph,
+        the second the in-depth explanation,
+        the third contains functional code based on the 
+          explanation,
+        and the fourth has a working demonstration.
+
+        In all cases, the code page contains a VERY LARGE
+        AMOUNT OF RAW TEXT.  Expand the tag at your own
+        risk.
+    -->
+    <!-- The header -->
+    <header>
+      <h1>Algorithms for Computer Games</h1>
+    </header>
+    
+    <!-- The navigation bar -->
+    <nav id = "top-nav">
+      <a href = "javascript:goto(0)">Home</a>
+      <!-- The first dropdown, for Pacman -->
+      <div class = "nav-dd">
+        <a>Pathfinding AI</a>
+        <div class = "nav-dd-menu">
+          <a href = "javascript:goto(1);">Introduction</a>
+          <a href = "javascript:goto(2);">Explanation</a>
+          <a href = "javascript:goto(3);">Code</a>
+          <a href = "javascript:goto(4);">Demonstration</a>
+        </div>
+      </div>
+      <!-- The second dropdown, for Battleship -->
+      <div class = "nav-dd">
+        <a>Battleship AI</a>
+        <div class = "nav-dd-menu">
+          <a href = "javascript:goto(5);">Introduction</a>
+          <a href = "javascript:goto(6);">Explanation</a>
+          <a href = "javascript:goto(7);">Code</a>
+          <a href = "javascript:goto(8);">Demonstration</a>
+        </div>
+      </div>
+      <!-- The third dropdown, for Maze generation -->
+      <div class = "nav-dd">
+        <a>Level Generation</a>
+        <div class = "nav-dd-menu">
+          <a href = "javascript:goto(9);">Introduction</a>
+          <a href = "javascript:goto(10);">Explanation</a>
+          <a href = "javascript:goto(11);">Code</a>
+          <a href = "javascript:goto(12);">Demonstration</a>
+        </div>
+      </div>
+      <a href = "javascript:goto(13);">About</a>
+    </nav>
+    
+    <!-- The Home Page [0] -->
+    <article class = "page">
+      <h1>Home</h1>
+      <p>Welcome!  This tutorial is about two things: Algorithms and games :P</p>
+      <h3>What you need to know:</h3>
+      <p>So... if you don&rsquo;t know what an Algorithm is, I strongly recommend you have a brief look at Khan Academy&rsquo;s Computer Science course, <a href = "https://www.khanacademy.org/computing/computer-science">here</a>.</p>
+      <p>There are a few more things you should be acquainted with, mostly about JavaScript. I&rsquo;ll list them out here:</p>
+      <ul>
+        <li>The <code>return</code> keyword &mdash;  Put it in a function, and it will output a value, like how <code>Math.sqrt()</code> works.  This keyword also stops any code after it from running.</li>
+        <li>The <code>continue</code> and <code>break;</code> keywords &mdash; These control the flow of <code>for</code> and <code>while</code> loops.</li>
+        <li>Recursion &mdash; This is where a function calls itself inside itself.  Unchecked, the function will be called infinitely and generate an error.  A lot of Algorithms rely on recursion.</li>
+        <li>Nested Arrays &mdash;  nested arrays (often called bitmaps) are a great way to store 2D data for anything from platformer levels to battleship game boards.  Say, that gives me an idea!</li>
+      </ul>
+      <h3>What you will (hopefully) learn about:</h3>
+      <p>If you want the dry and boring summary of what I am trying to teach, then here it is:</p>
+      <ul>
+        <li>Breadth First Search</li>
+        <li>Probability clouds</li>
+        <li>Depth First Search</li>
+      </ul>
+      <h3>About the Code</h3>
+      <p>Each tutorial has a page titled &ldquo;code.&rdquo;  The code there has been tested to run, and makes up a good portion of the demonstration following the code page.  In each example, though, you will see a comment above the <code>draw</code> function that describes some things that are missing.</p>
+      <p>I have intentionally left those functions out because they manage how something gets drawn or input.  That means, if you use my code, you have complete control over how your program looks and functions.  If you have any questions (about anything, really), then don&rsquo;t hesitate to ask.</p>
+      <button id = "to-first-page" onclick = "goto(1)">Start learning &rarr;</button>
+    </article>
+    <!-- The Pathfinding/pacman pages [1-4] -->
+    <article class = "page">
+      <h1>Pathfinding AI - Introduction</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "arrow-right" href = "javascript:goto(2);">Next</a>
+      </div>
+      <!-- Main content -->
+      <p>If you&rsquo;ve ever played Pacman, then you know what it&rsquo;s like to have an Artificial Intelligence that you can&rsquo;t shake.  Blinky is doing more than heading directly towards you.  He&rsquo;d run into a wall if he were.  Instead, he actively tracks the quickest route to you, and follows that route to its end.  So, the question is: <em>How does Blinky find the fastest route?</em></p>
+    </article>
+    <article class = "page">
+      <h1>Pathfinding AI - Explanation</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(1);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(3);">Next</a>
+      </div>
+      <!-- Main content -->
+      <p>Let&rsquo;s start by assuming that Blinky doesn&rsquo;t have any idea where Pacman is, or where to start looking for him:</p>
+      <canvas data-theme='pacman' data-code='grid 1,blinky 0 4,pacman 3 1 0,qmark 0 3' width = '200' height = '200'></canvas>
+      <p>He&rsquo;ll start looking in every direction he can move to (that&rsquo;s up, down, left, and right).  In this case, he can only move up.  Next, Blinky puts a marker there with a number on it, so he can remember when he looked there.</p>
+      <canvas data-theme='pacman' data-code='grid 1,blinky 0 4,pacman 3 1 0,num 0 3 1' width = '200' height = '200'></canvas>
+      <p>If those steps are repeated, Blinky will eventually end up with a trail of numbers leading to Pacman!  Unfortunately, there will also be an identical trail of numbers leading everywhere else, like this:</p>
+      <canvas data-theme='pacman' data-code='grid 1,blinky 0 4,pacman 3 1 0,num 0 3 1,num 0 2 2,num 1 3 2,num 2 3 3,num 0 1 3,num 0 0 4,num 2 2 4,num 2 4 4,num 2 1 5,num 3 4 5,num 2 0 6,num 4 4 6,num 4 3 7,num 4 1 7,num 4 0 8' width = '200' height = '200'></canvas>
+      <p>(Note that Pacman is sitting on top of the number 6, and Blinky on 0)</p>
+      <p>If Pacman were to follow Binky's trail of numbers, moving from 6 to 5, to 4, to 3, to 2, to 1, he would eventually arrive at Blinky.  So, what would it look like if Blinky started counting a Pacman's location?</p>
+      <canvas data-theme='pacman' data-code='grid 1,blinky 0 4,pacman 3 1 0,num 0 3 5,num 0 2 6,num 1 3 4,num 2 3 3,num 0 1 7,num 0 0 8,num 2 2 2,num 2 4 4,num 2 1 1,num 3 4 5,num 2 0 2,num 4 4 6,num 4 3 7,num 4 1 1,num 4 0 2' width = '200' height = '200'></canvas>
+      <p>Now, Pacman sits on 0, and Blinky on a 6.  But more importantly, Blinky can now count down from 6 and follow a trail right to Pacman!  Hooray! We've discovered a tracking algorithm!</p>
+      <p>Wait, did I say Algorithm?  That's a Computer Science thing, right?</p>
+      <p>Yes;  This algorithm is a variant of a searching algorithm known to programmers as a &ldquo;Breadth-First Search&rdquo; or BFS.  What a BFS algorithm does is find the shortest path between to items.  Those items are linked together, and often not in a grid like fashion:</p>
+      <canvas data-theme = "flowchart" data-code = "uno" width = "260" height = "219"></canvas>
+      <p>A grid is far more structured than that flowchart.  Each cell in the grid is &ldquo;linked&rdquo; to no more than four other cells;  that is, it has neighbors.  Each neighbor is either above, below, to the left of, or to the right of the cell.  And those four directions are a perfect segue to the actual code...</p>
+      <!-- More navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(1);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(3);">Next</a>
+      </div>
+    </article>
+    <article class = "page">
+      <h1>Pathfinding AI - Code</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(2);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(4);">Next</a>
+      </div>
+      <!-- A LOT of code -->
+      <div class = "highlighted">/*
+  The first steps described was to look in 
+  every direction. Here is every direction:
+*/
+var directions = [
+  [0, 1],  // Down
+  [0, -1], // Up
+  [-1, 0], // Left
+  [1, 0]   // Right
+];
+
+/*
+  Next is a bitmap that represents Pacman's 
+  world.  Every pound (#) symbol represents a 
+  block.
+*/
+var bitmap = [
+  "###############",
+  "#             #",
+  "# # ## # ## # #",
+  "# #         # #",
+  "#    ## ##    #",
+  "# ## #   # ## #",
+  "# #  #####  # #",
+  "#             #",
+  "# # ####### # #",
+  "# #         # #",
+  "# # ##   ## # #",
+  "#    #   #    #",
+  "# #  #   #  # #",
+  "# ## # # # ## #",
+  "#             #",
+  "###############"
+];
+
+
+/*
+  Here are the exact coordinates of Pacman (or 
+  player) and Blinky.
+*/
+var playerPos = [7, 10];
+var blinkyPos = [7, 5];
+
+/*
+  These store the coordinates Pacman and Blinky
+  are moving to.  They are always rounded to whole
+  numbers.
+*/
+var iPos = [7, 10];
+var bPos = [7, 5];
+
+
+/*
+  These keep track of which way Pacman and Blinky 
+  are moving
+*/
+var playerDir = -1;
+var blinkyDir = -1;
+
+/*
+  To find the fastest route to Pacman, Blinky 
+  has to leave a trail of numbers.  Rather 
+  than cluttering up the original bitmap, 
+  however, Blinky gets his own copy.
+*/
+var blinkysMap = [];
+
+/*
+  Fill Blink's map with placeholder values
+*/
+for (var i = 0; i &lt; bitmap.length; i++) {
+  blinkysMap.push ([]);
+  blinkysMap[i].length = bitmap[i].length;
+  blinkysMap[i].fill (-1);
+}
+
+
+/*
+  This function limits Blink's number 
+  placement to spaces that aren't blocks.
+  
+  'x' and 'y' are coordinates for 'bitmap'
+*/
+function isBlank (x, y) {
+  return bitmap[y][x] === " ";
+}
+
+
+/*
+  And now, the backbone of the code: the BFS 
+  algorithm itself!
+  
+  This algorithm is used recursively, which 
+  means the function calls itself until its 
+  job is done.
+  
+  'x' and 'y' are coordinate for 'bitmap', and
+  'num' is the number to be placed.
+*/
+function pathfindBFS (x, y) {
+  // A queue is a term that means "list of things 
+  // to do", at least to a programmer.  Here, the 
+  // list is of places where a number was put.
+  
+  // Every item in the queue has an x-coordinate, 
+  // y-coordinate, and a number.
+  var queue = [[x, y, 0]];
+  
+  // Continue searching until there is no place 
+  // left to look.
+  do {
+    
+    // Remove the last item from the queue, and 
+    // store it.
+    var lastItem = queue.shift();
+    
+    // Remember the x and y coordinates of that 
+    // item, and its number.
+    var tx = lastItem[0],
+        ty = lastItem[1],
+        tnum = lastItem[2];
+    
+    // If that item does not sit on the world, 
+    // ignore it.
+    if (!isBlank (tx, ty) ||
+          blinkysMap[ty][tx] >= 0) {
+      continue;
+    }
+    
+    // Leave a trail of numbers
+    blinkysMap[ty][tx] = tnum;
+
+    // Look in every direction by adding each 
+    // direction to the queue.
+    for (var i = 0; i &lt; 4; i++) {
+      queue.push([tx + directions[i][0],
+                  ty + directions[i][1],
+                  tnum + 1]);
+    }
+    
+    // Repeat until there is nothing left in the 
+    // queue
+  } while (queue.length > 0);
+  
+}
+
+
+/*
+  And here is where Blinky's movement is 
+  handled:
+*/
+function moveBlinky () {
+  // Round off the coordinates, so they work 
+  // as indexes.
+  var at_x = blinkyPos[0] | 0,
+      at_y = blinkyPos[1] | 0,
+      to_x = 0,
+      to_y = 0;
+  
+  // If Blinky has arrived at the next square
+  if (Math.abs(blinkyPos[0] - bPos[0]) &lt; 0.1 &&
+      Math.abs(blinkyPos[1] - bPos[1]) &lt; 0.1) {
+    
+    // Make sure his position becomes an integer
+    blinkyPos = bPos.slice();
+    
+    // Update these variables, too
+    at_x = bPos[0];
+    at_y = bPos[1];
+    
+    // Find what number Blinky is sitting on
+    var blinkyNum = blinkysMap[at_y][at_x];
+    
+    // Assume Blinky cannot go anywhere
+    blinkyDir = -1;
+    
+    // Look in every direction for a number 
+    // smaller than the one Blinky is sitting
+    // on.
+    for (var i = 0; i &lt; 4; i++) {
+      // Where does that direction go?
+      to_x = at_x + directions[i][0];
+      to_y = at_y + directions[i][1];
+      
+      // What number sits there?
+      var num = blinkysMap[to_y][to_x];
+
+      // If that number is less than the one
+      // Blinky is sitting on (and if it's not
+      // the placeholder -1) make that square
+      // the next one.
+      if (num === blinkyNum-1 && num >= 0) {
+        bPos[0] = to_x;
+        bPos[1] = to_y;
+        blinkyDir = i;
+        break;
+      }
+    }
+  }
+  
+  // If there is nowhere for Blinky to go,
+  // go nowhere.
+  if (blinkyDir &lt; 0) {
+    return;
+  }
+  
+  // Otherwise, move Blinky in the right direction.
+  blinkyPos[0] += directions[blinkyDir][0] * 0.1;
+  blinkyPos[1] += directions[blinkyDir][1] * 0.1;
+}
+
+
+/*
+  Move the player based on keyboard input
+*/
+function movePlayer () {
+  // Round off the coordinates, so they work 
+  // as indexes.
+  var at_x = playerPos[0] | 0,
+      at_y = playerPos[1] | 0,
+      to_x = 0,
+      to_y = 0;
+  
+  // If Pacman has arrived at the next square
+  if (Math.abs(playerPos[0] - iPos[0]) &lt; 0.1 &&
+      Math.abs(playerPos[1] - iPos[1]) &lt; 0.1) {
+    
+    // Make sure his position becomes an integer
+    playerPos = iPos.slice();
+    
+    // Update these variables, too
+    at_x = iPos[0];
+    at_y = iPos[1];
+    
+    // Change the player's direction if the
+    // WASD keys are pressed.
+    switch (keyCode) {
+      // Down, or "s"
+      case 83:
+        to_y = at_y + directions[0][1];
+        to_x = at_x + directions[0][0];
+        if (isBlank(to_x, to_y)){
+          playerDir = 0;
+        }
+      break;
+      // Up, or "w"
+      case 87:
+        to_y = at_y + directions[1][1];
+        to_x = at_x + directions[1][0];
+        if (isBlank(to_x, to_y)){
+          playerDir = 1;
+        }
+      break;
+      // Left, or "a"
+      case 65:
+        to_y = at_y + directions[2][1];
+        to_x = at_x + directions[2][0];
+        if (isBlank(to_x, to_y)){
+          playerDir = 2;
+        }
+      break;
+      // Right, or "d"
+      case 68:
+        to_y = at_y + directions[3][1];
+        to_x = at_x + directions[3][0];
+        if (isBlank(to_x, to_y)){
+          playerDir = 3;
+        }
+      break;
+    }
+    
+    // If the key press enables Pacman to not
+    // hit a wall, update the player's next square
+    // and direction.
+    if (playerDir >= 0) {      
+      to_x = iPos[0] + directions[playerDir][0];
+      to_y = iPos[1] + directions[playerDir][1];
+      
+      if (!isBlank(to_x, to_y)) {
+        playerDir = -1;
+      } else {
+        iPos[0] = to_x;
+        iPos[1] = to_y;
+      }
+    }
+  }
+  
+  // If there is nowhere for Pacman to go,
+  // go nowhere.
+  if (playerDir &lt; 0) {
+    return;
+  }
+  
+  // Otherwise, move Pacman in the right direction.
+  playerPos[0] += directions[playerDir][0] * 0.1;
+  playerPos[1] += directions[playerDir][1] * 0.1;
+}
+
+
+/*
+  drawLevel, drawblinky, and drawPacman are not 
+  defined in this example.  They exist for 
+  demonstration purposes.
+*/
+draw = function () {
+  // Update everything
+  moveBlinky ();
+  movePlayer ();
+  
+  // Display everything
+  drawLevel ();
+  drawBlinky ();
+  drawPacman ();
+
+};
+
+// That's all, folks!</div>
+      <!-- More nav links.  Congratulations if you actually are reading this xD -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(2);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(4);">Next</a>
+      </div>
+    </article>
+    <article class = "page">
+      <h1>Pathfinding AI - Demonstration</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(3);">Previous</a>
+        <a class = "home-right" href = "javascript:goto(0);">Home</a>
+      </div>
+      <!-- Demonstration canvas -->
+      <canvas data-theme = "pacman" data-code = "demo" width = "600" height = "640"></canvas>
+    </article>
+    <!-- The pattern finding / battleship pages [5-8] -->
+    <article class = "page">
+      <h1>Battleship AI - Introduction</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "arrow-right" href = "javascript:goto(6);">Next</a>
+      </div>
+      <!-- Main content -->
+      <p>You've probably played the game Battleship.  If you're not familiar with it, here's how it works:</p>
+      <p>You and your opponent place five ships (a destroyer, cruiser, submarine, aircraft carrier, and a PT boat) on a 10 by 10 grid. Then both players take turns firing hypothetical torpedoes at each other's ships by guessing the coordinates.  A player wins when all the opponents ships are sunk.</p>
+      <p>Creating a program to play you at battleship would be easy, except it needs an artificial intelligence to make an educated guess at where your ships are.  That means it has to look at 100 squares, see which are marked &ldquo;hit&rdquo;, &ldquo;missed&rdquo;, or &ldquo;empty&rdquo;, then find where a remaining ship is most likely to be hid.  Sounds tough...</p>
+      <p>The algorithm is not one I created.  I found it at <a href = "https://www.datagenetics.com/blog/december32011/">www.datagenetics.com/blog/december32011/</a> when trying to write a battleship game in C++.  The tutorial did not provide any code, so the implementation of this AI is (mostly) my own work.</p>
+    </article>
+    <article class = "page">
+      <h1>Battleship AI - Explanation</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(5);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(7);">Next</a>
+      </div>
+      <!-- Main content -->
+      <p>In the introduction, I mentioned that an Artificial Intelligence for Battleship has to deduce where a ship is <em>most likely</em> to be hid.  That sounds like a question involving probability, which is good &mdash; probability is an easy thing to define.</p>
+      <p>Let&rsquo;s call probability the odds of one square, out of all 100 squares, having a ship on it.  It doesn't matter which ship is on it, or which part of a ship;  A ship just need to occupy that square.  The ship also can't be sitting on a square designated as &ldquo;hit&rdquo; or &ldquo;missed&rdquo;.</p>
+      <p>Probability comes in when every combination of remaining ships that touch the one square is determined.  The total of all those combinations is the most useful part of this process.  Because it represents the probability of one square having a ship, comparing the square&rsquo;s number to the probabilities of every other empty square will determine the <em>most likely</em> square.</p>
+      <p>Hopefully I didn&rsquo;t make that confusing.  If I did, maybe this visualization will help.  You can see a 10 x 10 grid, filled in with shades of green.  The brighter the green is, the higher the probability of a ship being on it is.  A black square is a miss, and a white one is a hit.  No shots have been fired.</p>
+      <canvas data-theme = "battleship" data-code = "blankmap" width = "200" height = "200"></canvas>
+      <p>You can see that the brightest green is toward the center of the canvas.  So, what would happen if the AI fired a shot around there?</p>
+      <canvas data-theme = "battleship" data-code = "visual 0002-0003-0003-0004-0005 556" width = "200" height = "200"></canvas>
+      <p>Hey, that did something!  Now here&rsquo;s a sample grid where there are a few misses and hits.  Both the PT Boat (length 2) and the Submarine (length 3) have been sunk, so the algorithm does not include them in the probability.  To the computer, that would make the probability counts lower, and thus the grid darker.  However, I increased the brightness so you can distinguish the probability grid.</p>
+      <canvas data-theme = "battleship" data-code = "visual 3005-9414-3903 556-446-736-461-471-486-451-446-776-121-136-111" width = "200" height = "200"></canvas>
+      <p>Very interesting.  Now let&rsquo;s see what happens if a ship is <em>mostly</em> destroyed:</p>
+      <canvas data-theme = "battleship" data-code = "visual 3005-9414-3903 556-446-736-461-471-486-451-446-776-121-136" width = "200" height = "200"></canvas>
+      <p>If you look closely, you&rsquo;ll see that the next square of the PT Boat (at B2, if you know battleship coordinates) is not the brightest square.  But we know it is the best move.  So, now it is time to introduce...</p>
+      <h1>The Second Part of the battleship AI</h1>
+      <p>So, we&rsquo;ve found a way to find ships via probability.  Now what?  Let&rsquo;s suppose that I was playing battleship...</p>
+      <p class = "mythoughts">If I called a hit, I would search each adjacent square for another hit, to try and determine how the ship is oriented.  Then, I&rsquo;d fire in that direction until my opponent calls out &ldquo;sunk!&rdquo;</p>
+      <p>It doesn&rsquo;t seem very practical to store a supposed orientation of a ship, so I (and the blog where I got this algorithm from) recommend storing a list of adjacent squares to every hit, and firing each of them until there are none left.  That&rsquo;s pretty simple.  In fact, it&rsquo;s not all that different than Blink&rsquo;s search algorithm from the previous tutorial.</p>
+      <p>But, since this is a tricky thing to demonstrate with a static image, I shall have to end the Explanation, so you can go read the code.</p>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(5);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(7);">Next</a>
+      </div>
+    </article>
+    <article class = "page">
+      <h1>title</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(6);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(8);">Next</a>
+      </div>
+      <!-- Even MORE code! -->
+      <div class = "highlighted">/*
+  For your convenience, the values
+  that represent ships, shots, and
+  orientations have been labeled.
+*/
+var HIT   = 1,
+    MISS  = 6,
+    EMPTY = 0,
+    
+    HORIZONTAL = 0,
+    VERTICAL   = 1,
+    
+    CARRIER    = 5,
+    BATTLESHIP = 4,
+    CRUISER    = 3,
+    SUBMARINE  = 3,
+    PT_BOAT    = 2;
+
+/*
+  The first thing that should be created
+  are the two boards;  `playerGrid` will
+  store the player's ships and the AI's
+  guesses, and `AIgrid` the AI's ships
+  and the player's guesses.
+*/
+var AIgrid = [
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0]
+];
+
+var playerGrid = [
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0]
+];
+
+/*
+  This is a list of the lengths of each ship.
+  When a ship is sunk, it is removed from
+  this array.
+*/
+var AIships  = [
+  CARRIER,
+  BATTLESHIP,
+  CRUISER,
+  SUBMARINE,
+  PT_BOAT
+];
+var playerShips = [
+  CARRIER,
+  BATTLESHIP,
+  CRUISER,
+  SUBMARINE,
+  PT_BOAT
+];
+
+/*
+  These store the positions and orientations of
+  each ship for the player and the AI.  It is
+  only used for determining which ship is hit,
+  and whether that ship is sunk.
+
+  Entries in this array follow the format:
+            [x, y, orientation, life]
+  
+  NOTE: life represents the number of shots needed
+  to sink the ship;  this defaults to the ship's
+  length.
+*/
+var AIcoords = [];
+var playerCoords = [];
+
+/*
+  A queue is a list of things to do.  Here, that
+  list contains a list of places in which a hit
+  might be stored.
+
+  This list is only filled after a hit has been
+  made.  It allows the AI to finish off a ship
+  once it has been discovered.
+*/
+var firingQueue = [];
+
+
+/*
+  `nextMove` stores a pair of coordinates for
+  the next shot to be fired.  This is altered
+  by the player and the AI, in their respective
+  turns.
+*/
+var nextMove = [0, 0];
+
+/*
+  And speaking of turns, here is a variable to
+  govern them!
+*/
+var turn = "player";
+
+/*
+  The winner is who ever does not have 0 ships
+  left.  This variable's purpose is to stop the
+  game sequence, and display a win screen.
+*/
+var winner = "none";
+
+/*
+  This is another grid, specifically for the AI.
+  It is filled with 100 numbers, each representing
+  the number of combinations of remain ships that
+  fit on a specific square.
+*/
+var probs = [[],[],[],[],[],[],[],[],[],[]];
+
+/*
+  You should remember this from Pacman.
+*/
+var dirs  = [
+  [0, +1],
+  [0, -1],
+  [-1, 0],
+  [+1, 0]
+];
+
+
+/*
+  And now, the first function: `isntEmpty` returns
+  whether a HIT or MISS has been fired by the AI on
+  a given square.
+*/
+function isntEmpty (x, y) {
+  // There's not much to explain about it...
+  return playerGrid[y][x] === HIT ||
+          playerGrid[y][x] === MISS;
+}
+
+/*
+  Now here is an important piece of code!
+  `getSquareProbs` adds values to the `probs` array,
+  but only checks an individual square.
+*/
+function getSquareProbs (x, y) {
+  // How many ships does the player have left?
+  var len = playerShips.length;
+
+  // For each remaining ship...
+  for (var i = 0; i &lt; len; i++) {
+    // Store the size of the current ship
+    var shipSize = playerShips[i];
+
+    // A few preliminary variables:
+    // `valid` stores whether a square
+    // can contain the current ship
+    var valid    = true;
+
+    // `j` is used to loop through squares
+    // and find things that might prevent
+    // a ship from existing on this square
+    var j;
+
+    // If the ship fits within the right
+    // edge of the grid...
+    if (x + shipSize &lt;= 10) {
+      // Check if a ship sitting here
+      // would overlap with a hit or
+      // a miss.
+      for (j = 0; j &lt; shipSize; j++) {
+        // If so, then the ship cannot exist
+        // horizontally
+        if (isntEmpty(x + j, y)) {
+          valid = false;
+          break;
+        }
+      }
+
+      // If it was determined that a ship
+      // could sit here,
+      if (valid) {
+        // Increase the probability for
+        // every square that ships sits on.
+        for (j = 0; j &lt; shipSize; j++) {
+          probs[y][x + j] ++;
+        }
+      }
+    }
+
+    // This is the same process, but for
+    // vertically-aligned ships.
+    if (y + shipSize &lt;= 10) {
+      // Assume nothing is in the way
+      valid = true;
+
+      // If something is, then change our
+      // assumption.
+      for (j = 0; j &lt; shipSize; j++) {
+        if (isntEmpty(x, y + j)) {
+          valid = false;
+          break;
+        }
+      }
+
+      // Increase probabilities, if needed.
+      if (valid) {
+        for (j = 0; j &lt; shipSize; j++) {
+          probs[y + j][x] ++;
+        }
+      }
+    }
+  }
+}
+
+/*
+  This function calls `getSquareProbs` for every
+  square in the 10x10 grid, thereby filling the
+  `probs` array completely.
+*/
+function getProbs () {
+  // `x` and `y` are needed for more than one
+  // `for` loop, so I put them out here.
+  var x, y;
+
+  // Fill the `probs` array with zeros.
+  for (x = 0; x &lt; 10; x++) {
+    for (y = 0; y &lt; 10; y++) {
+      probs[y][x] = 0;
+    }
+  }
+
+  // Add the actual probabilities for each
+  // square.
+  for (y = 0; y &lt; 10; y++) {
+    for (x = 0; x &lt; 10; x++) {
+      // If a square is a HIT or a MISS, then
+      // Don't bother checking it.
+      if (isntEmpty (x, y)) {
+        continue;
+      }
+      getSquareProbs (x, y);
+    }
+  }
+}
+
+/*
+  This is where everything for the AI is put
+  together.
+*/
+function handleAIturn () {
+  // If a ship is not yet sunk,
+  if (firingQueue.length > 0) {
+    // Pull the next item out of the queue
+    nextMove = firingQueue.pop();
+
+    // The that square was inadvertently fired
+    // at in a previous move,
+    if (isntEmpty(nextMove[0], nextMove[1])) {
+      // Try again
+      return handleAIturn();
+    }
+  
+  // Otherwise, if there are no ships
+  // found that are not sunk,
+  } else {
+    // Load the probability cloud
+    getProbs ();
+
+    // Look for the highest probability.
+    // `highest` remembers what the highest is,
+    // so it can be compared to other squares.
+    var highest = 1;
+    for (var y = 0; y &lt; 10; y++) {
+      for (var x = y&amp;1; x &lt; 10; x+=2) {
+        var prob = probs[y][x];
+
+        // If there is a higher probability,
+        if (prob > highest) {
+          highest = prob;
+          // Make the current square the
+          // `nextMove`
+          nextMove = [x, y];
+        }
+      }
+    }
+  }
+}
+
+/*
+  `trackship` adds squares to the queue whenever
+  a ship is hit.  The algorithm itself is rather
+  similar to flood-filling, but that is another
+  topic.
+*/
+function trackShip (x, y) {
+  // Look in every direction (in the `dirs` array)
+  for (var i = 4; i--;) {
+    // Find the square in that direction.
+    var dx = x + dirs[i][0];
+    var dy = y + dirs[i][1];
+
+    // If there is no square in that direction,
+    // then skip it.
+    if (dx &lt; 0 || dy &lt; 0 || dx > 9 || dy > 9) {
+      continue;
+    }
+
+    // If nothing is there already,
+    if (!isntEmpty(dx, dy)) {
+      // Add the square to a list of places to
+      // fire at.
+      firingQueue.push([dx, dy]);
+    }
+  }
+}
+
+/*
+  Manages firing for both the player and the AI.
+*/
+function fireShot () {
+  // Some global variables about the shot.
+  var x = nextMove[0],
+      y = nextMove[1],
+      formerItem,
+      alignment,
+      i,
+      shipSize, shipX, shipY;
+  
+  // If the player fired,
+  if (turn === "player") {
+    formerItem = AIgrid[y][x];
+
+    // Update the grid.
+    if (formerItem === EMPTY) {
+      AIgrid[y][x] = MISS;
+    } else {
+      AIgrid[y][x] = HIT;
+      hit = true;
+    }
+
+    // If a ship was hit, then deplete its
+    // "life"
+    for (i = 0; i &lt; AIcoords.length; i++) {
+      shipSize  = AIships[i];
+      shipX     = AIcoords[i][0];
+      shipY     = AIcoords[i][1];
+      alignment = AIcoords[i][2];
+
+      if (
+        alignment === VERTICAL && y === shipY &&
+        x >= shipX && x &lt; shipX + shipSize
+      ) {
+        AIcoords[i][3] --;
+        break;
+      } else if (
+        x === shipX && y >= shipY &&
+        y &lt; shipY + shipSize
+      ) {
+        AIcoords[i][3] --;
+        break;
+      }
+    }
+    
+  }
+  // If the AI fired
+  else {
+    formerItem = playerGrid[y][x];
+
+    // Update the grid, and trigger start
+    // filling the AI's queue
+    if (formerItem === 0) {
+      playerGrid[y][x] = 6;
+    } else {
+      playerGrid[y][x] = 1;
+      trackShip(x, y);
+      hit = true;
+    }
+
+    // If a ship was hit, then deplete its
+    // "life"
+    for (i = 0; i &lt; playerCoords.length; i++) {
+      shipSize  = playerShips[i];
+      shipX     = playerCoords[i][0];
+      shipY     = playerCoords[i][1];
+      alignment = playerCoords[i][2];
+
+      if (
+        alignment === VERTICAL && y === shipY &&
+        x >= shipX && x &lt; shipX + shipSize
+      ) {
+        playerCoords[i][3] --;
+        break;
+      } else if (
+        x === shipX && y >= shipY &&
+        y &lt; shipY + shipSize
+      ) {
+        playerCoords[i][3] --;
+        break;
+      }
+    }
+  }
+}
+
+/*
+  At long last! The `draw` function!
+
+  Once again, there are a few functions
+  that I didn't define:
+
+  drawWinScreen  - Only called when a 
+                    winner is determined.
+  drawInterface  - Whatever UI you want
+                    the battleship game
+                    to have.
+  loadShips      - Should return `true`
+                    if both the player's
+                    and the AI's grids
+                    are filled with ships.
+  playerHasInput - Returns true if the
+                    player input coordinates
+                    for firing.
+  getPlayerCoords- Returns a pair of
+                    coordinates that tell
+                    where the player fired.
+*/
+draw = function () {
+  var i, b;
+
+  // If a winner was determined, then
+  // draw the win screen, and do 
+  // nothing else.
+  if (winner !== "none") {
+    drawWinScreen ();
+    return;
+  }
+
+  // Draw the User Interface
+  drawInterface ();
+
+  // Make sure all the ships are present
+  if (!loadShips()) {
+    return;
+  }
+
+  // Handel turns.
+  if (turn === "player") {
+    // If the player did nothing, then
+    // the game does nothing, too.
+    if (!playerHasInput()) {
+      return;
+    }
+
+    // Get where the player fired.
+    nextMove = getPlayerCoords ();
+
+    // If something already exists there,
+    // then fail the shot.
+    b = AIgrid[nextMove[1]][nextMove[0]];
+    if (b === MISS || b === HIT) {
+      return;
+    }
+
+    // Fire the shot, assuming it passed
+    // the above test.
+    fireShot ();
+
+    // Remove any sunken ships.
+    for (i = AIships.length; i--;) {
+      if (AIcoords[i][3] &lt;= 0) {
+        AIships.splice(i, 1);
+        AIcoords.splice(i, 1);
+        break;
+      }
+    }
+
+    // It is now the AI's turn. Gulp.
+    turn = "ai";
+  } else {
+    // Let the AI find its next shot
+    handleAIturn ();
+
+    // Fire that shot
+    fireShot ();
+
+    // Remove any sunken ships
+    for (i = playerShips.length; i--;) {
+      if (playerCoords[i][3] &lt;= 0) {
+        playerShips.splice(i, 1);
+        playerCoords.splice(i, 1);
+        break;
+      }
+    }
+
+    // Now it's the player's turn again.
+    turn = "player";
+  }
+
+  // If the AI or the player ran out of
+  // ships, then declare a winner.
+  if (AIships.length &lt;= 0) {
+    winner = "player";
+  } else if (playerShips.length &lt;= 0) {
+    winner = "AI";
+  }
+};
+
+// That's all folks!</div>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(6);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(8);">Next</a>
+      </div>      
+    </article>
+    <article class = "page">
+      <h1>Battleship AI - Demonstration</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(7);">Previous</a>
+        <a class = "home-right" href = "javascript:goto(0);">Home</a>
+      </div>
+      <!-- Demonstration canvas -->
+      <canvas data-theme = "battleship" data-code = "demo" width = "490" height = "300"></canvas>
+    </article>
+    <!-- The maze generation pages [9-12] -->
+    <article class = "page">
+      <h1>Maze Generation - Introduction</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "arrow-right" href = "javascript:goto(10);">Next</a>
+      </div>
+      <p>For this last section, I want to explain procedural level generation.  More specifically, maze generation.  It&rsquo;s something I figured out 2 years ago (which is a very long time), and it&rsquo;s simple enough for me to complete within the contest deadline.  I know you probably have questions, so I'll use this as an excuse to put in a list element:</p>      
+      <h4>Can&rsquo;t you make it a little more interesting?</h4>
+      <p class = "mythoughts">All right, how about if I tell you how to add specified rooms inside a maze?  I can do that.</p>
+      <h4>Why is procedural level generation so great?</h4>
+      <p class = "mythoughts">Because the alternative is hiring a bunch of people to write hundreds of levels.</p>
+      <h4>Couldn&rsquo;t I just use randomly placed blocks?</h4>
+      <p class = "mythoughts">Yes.  But that would not make a good tutorial.</p>
+      <h4>Why is there always so much blank space down there?</h4>
+      <p class = "mythoughts">So the footer stays where it should.  Now go read the tutorial.</p>
+    </article>
+    <article class = "page">
+      <h1>Maze Generation - Explanation</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(9);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(11);">Next</a>
+      </div>
+      <!-- Main Content -->
+      <p>I&rsquo;ll start by explaining how to generate a random maze.  Remember the Pacman tutorial on Breadth-First searching?  Good.  I&rsquo;m now going to explain a very similar algorithm, known as &ldquo;Depth-First&rdquo; search.</p>
+      <p>These two searching algorithms behave very differently.  Breadth-First Search is like a search party that spreads out from the starting point, going down each path at the same pace.  Depth-First Search works like an individual who follows a path as far as it goes, then turns around to try the next branch when he hits a dead end.  Here's a visualization.  I enjoy making these <code>:D</code></p>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <h3>Depth-First Search:</h3>
+              <canvas data-theme = "flowchart" data-code = "tres,dos" width = "220" height = "200"></canvas>
+            </td>
+            <td style = "width: 20px"></td>
+            <td>
+              <h3>Breadth-First Search:</h3>
+              <canvas data-theme = "flowchart" data-code = "tres,quatro" width = "220" height = "200"></canvas>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p>So why would I want to use Depth-First Search for generating a maze?  Depth-First Search works one step at a time, which means that it can create paths as it goes.  Breadth-First Search, on the other hand, will spread in every direction equally.  Using this for maze generating would result in something with very short dead-end trails, and a super easy-to-solve maze.</p>
+      <p>For this to be a professional Computer Science lesson, I should probably mention pseudocode somewhere.  Why not here.  Here's a list to follow for generating a maze with Depth-First Searching:</p>
+      <ol>
+        <li>Start with a blank grid of whatever size you wish</li>
+        <li>Start at the top left corner (or anywhere, really)</li>
+        <li>Leave a number at that square</li>
+        <li>Look up, down, left and right for squares that are on the grid and are blank. If there aren&rsquo;t any, then go to step 5</li>
+        <li>Pick one of those squares randomly, and move there.  Go back to step 3</li>
+        <li>If no acceptable squares were found in step 3, then look for the previous number</li>
+        <li>If the previous number is found, go to step 3 again.  If not, then the maze is complete!</li>
+        <li>Look over the whole gird, and carve out a maze following the algorithm's path.</li>
+      </ol>
+      <p>Seven instructions?!?  That&rsquo;s all there is to it?!?</p>
+      <p>Yup.  I told you it was simple.  So how would I add rooms?</p>
+      <p>The easiest way is to have a pre-defined set of rectangles (the rooms), with set coordinates for entrances and exits.  The DFS algorithm then has to check if it is inside a room, and only be allowed to leave it if it is on one of the exits.  Voil&agrave;!</p>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(9);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(11);">Next</a>
+      </div>
+    </article>
+    <article class = "page">
+      <h1>Maze Generation - Code</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(10);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(12);">Next</a>
+      </div>
+      <!-- A TON MORE code -->
+      <div class = "highlighted">/*
+  First up, there is the arbitrary point at which
+  the DFS generator starts.
+
+  VERY IMPORTANT NOTE:
+
+  All values for rooms, sizes, and coordinates
+  work best when they are odd numbers.  Results
+  may be unpredictable for even numbers.
+*/
+var START_X = 1;
+var START_Y = 1;
+
+/*
+  These variables specify the size of the grid.
+*/
+var GRID_WIDTH = 21;
+var GRID_HEIGHT = 21;
+
+/*
+  These constants represent special squares in the
+  grid; They are used to control how the DFS 
+  responds to rooms.
+*/
+var ROOM_EXIT = -2;
+var ROOM_SQUARE = -1;
+var BLANK = 0;
+
+/*
+  This is where you specify the different rooms.  
+  Each one  is represented by an object, 
+  containing the position, size, and exit 
+  locations.
+  
+  NOTE: exit locations are coordinates relative to
+        the x/y position of a room.  They do not
+        need to be changed to move a room.
+*/
+var rooms = [
+  {
+    x: 1,
+    y: 1,
+    width: 5,
+    height: 3,
+    exits: [
+      [0, 0],
+      [4, 0],
+      [2, 2]
+    ]
+  },
+  {
+    x: 7,
+    y: 7,
+    width: 7,
+    height: 9,
+    exits: [
+      [2, 0],
+      [4, 0],
+      [0, 8],
+      [6, 8]
+    ]
+  },
+  {
+    x: 9,
+    y: 17,
+    width: 11,
+    height: 3,
+    exits: [
+      [0, 2],
+      [10, 0]
+    ]
+  }
+];
+
+/*
+  And here is the grid!  You may notice that it has
+  nothing in it.  It gets initiated by a call to
+  `primeGrid()`
+*/
+var grid = [];
+
+/*
+  I sincerely hope this array looks familiar to 
+  you.  If  not, then you should probably start
+  over reading these tutorials.
+  
+  ANOTHER NOTE: Why are these numbers 2 instead of
+                1?  Because the Algorithm skips
+                squares to provide walls.
+*/
+var dirs = [
+  [-2, 0],
+  [+2, 0],
+  [0, -2],
+  [0, +2]
+];
+
+
+/*
+  A very simple function that returns `true` if the
+  coordinates passed to it are outside the grid.
+*/
+function cantGo(x, y) {
+  return x &lt; 0 || y &lt; 0 || y &gt;= GRID_HEIGHT ||
+         x &gt;= GRID_WIDTH;
+}
+
+/*
+  Fills `grid` with BLANK values, according to 
+  `GRID_WIDH` and `GRID_HEIGHT`
+*/
+function primeGrid() {
+  grid.length = 0;
+  for (var i = 0; i &lt; GRID_HEIGHT; i++) {
+    grid.push([]);
+    grid[i].length = GRID_WIDTH;
+    grid[i].fill(0);
+  }
+}
+
+/*
+  Places a "room" onto the `grid`.  The placement
+  of `ROOM_EXIT` and `ROOM_SQUARE` reroute the
+  otherwise random DFS
+*/
+function placeRoom(room) {
+  // Confine the room to within `grid`
+  var startX = Math.max(room.x, 0),
+      startY = Math.max(room.y, 0),
+      endX = Math.min(
+        room.x + room.width,
+        GRID_WIDTH
+      ),
+      endY = Math.min(
+        room.y + room.height,
+        GRID_HEIGHT
+      );
+
+  // Loop through each square of the grid that a
+  // room overlaps
+  var x, y, i;
+  for (y = startY; y &lt; endY; y++) {
+    for (x = startX; x &lt; endX; x++) {
+      // Place a value there.
+      grid[y][x] = ROOM_SQUARE;
+    }
+  }
+
+  // Add exits as specified by the room's object.
+  // `cantGo` ensures exits are inside the `grid`
+  for (i = 0; i &lt; room.exits.length; i++) {
+    x = room.exits[i][0] + room.x;
+    y = room.exits[i][1] + room.y;
+
+    if (cantGo(x, y)) {
+      continue;
+    }
+
+    grid[y][x] = ROOM_EXIT;
+  }
+}
+
+/*
+  And now... the backbone of this program:
+  
+    = The Depth-First Search algorithm =
+  
+  This function is recursive!  That means it
+  calls itself as needed, until its goal is
+  met.
+*/
+function mazeDFS(x, y, number) {
+  // What the DFS is currently over
+  var atop = grid[y][x];
+
+  // A list of valid squares where
+  // the maze could go
+  var available = [];
+
+  // Coordinates of the square with a
+  // number one less than the current one.
+  var previousX = x,
+    previousY = y;
+
+  // A handy integer/iterator/index
+  var i;
+
+  // Set the current square with the proper
+  // number.
+  grid[y][x] = number;
+
+  // Look in each direction
+  for (i = 0; i &lt; 4; i++) {
+    // Remember that direction
+    var to_x = x + dirs[i][0];
+    var to_y = y + dirs[i][1];
+
+    // If it goes off the grid,
+    // ignore it.
+    if (cantGo(to_x, to_y)) {
+      continue;
+    }
+
+    // What is in that direction?
+    var value = grid[to_y][to_x];
+
+    // Determine where the previous square lies
+    if (value > 0 && value === number - 1) {
+      previousX = to_x;
+      previousY = to_y;
+    }
+
+    // If there is an exit which the maze
+    // must go through, then go through it!
+    if (
+      (value === ROOM_EXIT && atop === BLANK) ||
+      (value === BLANK && atop === ROOM_EXIT)
+    ) {
+      return mazeDFS(to_x, to_y, number + 1);
+    }
+
+    // If the DFS is inside a room, restirct it to
+    // that room.  The maze should only exit it
+    // where told to.
+    if (
+      (atop ===ROOM_SQUARE || atop ===ROOM_EXIT) ||
+      (value ===ROOM_SQUARE || value ===ROOM_EXIT)
+    ){
+      available.push([to_x, to_y]);
+
+    // If the DFS is not in a room, then add valid
+    // squares to `available`
+    } else if (value === BLANK) {
+      available.push([to_x, to_y]);
+    }
+
+  }
+
+  // If there were no valid squares found...
+  if (available.length &lt;= 0) {
+    // If the DFS has returned to it's origin,
+    // then the maze is complete -- 100%
+    // garunteed, or your money back!
+    if (number &lt;= 1) {
+      return;
+    }
+
+    // Otherwise, backtrack to the previous square
+    // and look for another route to make
+    mazeDFS(previousX, previousY, number - 1);
+
+    // If there are valid squares, pick a random one
+    // and go there.
+  } else {
+    i = Math.random() * available.length | 0;
+    mazeDFS(
+      available[i][0],
+      available[i][1],
+      number + 1
+    );
+  }
+}
+
+/*
+  This function takes the `grid` after the DFS
+  is run, and creates a cleaned-up version of it
+  that only contains walls and non-walls.
+*/
+function cleanGrid() {
+  // The cleaned-up grid
+  var returnGrid = [];
+
+  // Some generic x & y coordinates
+  var x, y, tx, ty;
+
+  // A value gathered from `grid`
+  var v;
+
+  // An iterator/integer
+  var i;
+
+  // Start by assuming everything is a wall.
+  for (y = 0; y &lt; GRID_HEIGHT; y++) {
+    returnGrid.push([]);
+    for (x = 0; x &lt; GRID_WIDTH; x++) {
+      returnGrid[y][x] = 1;
+    }
+  }
+
+  // Then look closer at each square
+  for (y = 0; y &lt; GRID_HEIGHT; y++) {
+    for (x = 0; x &lt; GRID_WIDTH; x++) {
+      v = grid[y][x];
+
+      // If there is nothing there,
+      // move on to the next square.
+      if (v === BLANK || v === ROOM_SQUARE) {
+        continue;
+      }
+
+      // Otherwise, carve a path.
+      returnGrid[y][x] = 0;
+
+      // Remember that squares are skipped for
+      // a wall 1-unit thick.  This carves
+      // a path between squares so it looks
+      // as it should.
+      for (i = 0; i &lt; 4; i++) {
+        tx = dirs[i][0];
+        ty = dirs[i][1];
+
+        // Makes sure we're looking in the right
+        // places
+        if (cantGo(x + tx, y + ty)) {
+          continue;
+        }
+
+        // If we found it,
+        if (grid[y + ty][x + tx] === v - 1) {
+          // Put a square here.
+          // Since the DFS moves two squares at a
+          // time, dividing by 2 will give the
+          // desired 1 square.
+          tx *= 0.5;
+          ty *= 0.5;
+          returnGrid[y + ty][x + tx] = 0;
+          break;
+        }
+      }
+    }
+  }
+
+  // Now, clear each room of potential walls.
+  for (var i = 0; i &lt; rooms.length; i++) {
+    var room = rooms[i];
+
+    // Make sure the room doesn't reach beyond
+    // the `grid`
+    var startX = Math.max(room.x, 0),
+        startY = Math.max(room.y, 0),
+        endX = Math.min(
+          room.x + room.width,
+          GRID_WIDTH
+        ),
+        endY = Math.min(
+          room.y + room.height,
+          GRID_HEIGHT
+        );
+
+    // Set the needed squares
+    for (y = startY; y &lt; endY; y++) {
+      for (x = startX; x &lt; endX; x++) {
+        returnGrid[y][x] = 0;
+      }
+    }
+  }
+  return returnGrid;
+}
+
+
+/*
+  And here is everything stuck together in one
+  function
+*/
+function createNewWorld() {
+  primeGrid();
+  for (var i = 0; i &lt; rooms.length; i++) {
+    placeRoom(rooms[i]);
+  }
+  mazeDFS(START_X, START_Y, 1);
+  return cleanGrid();
+}
+
+/* Generate a maze */
+var levelBitmap = createNewWorld();
+
+/*
+  The draw function isn't needed for a static
+  image.  I just put it here to be consistant.
+  
+  `drawLevelBitmap` must be created by you.
+*/
+draw = function () {
+  drawLevelBitmap();
+};
+// That's all, folks!</div>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(9);">Previous</a>
+        <a class = "arrow-right" href = "javascript:goto(11);">Next</a>
+      </div>
+    </article>
+    <article class = "page">
+      <h1>Maze Generation - Demonstration</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "arrow-left" href = "javascript:goto(11);">Previous</a>
+        <a class = "home-right" href = "javascript:goto(0);">Home</a>
+      </div>
+      <!-- Demonstration canvas -->
+      <canvas data-theme = "maze" data-code = "demo"></canvas>
+    </article>
+    <!-- The about page [13] -->
+    <article class = "page">
+      <h1>About</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "arrow-right" href = "javascript:goto(14);">Home</a>
+      </div>
+      <!-- All about everything... one thing at a time! -->
+      <p>This program was created for the &ldquo;Teach a CS Concept&rdquo; contest on Khan Academy.  All code was created by HSstudent16, and (along with every other program on Khan Academy) is licensed under the MIT.</p>
+      <h3>Where credit is due:</h3>
+      <ul>
+        <li>Polar @<a href = "https://www.khanacademy.org/profile/notpolar">notpolar</a> &mdash; I&rsquo;ve seen the new tab functionality used in several programs, but Polar's was on the hotlist when I decided to add it.  Found at <a href = "https://www.khanacadmey.org/cs/i/6600859040399360">Fixing Snippets</a></li>
+        <li>Ibraheem Ahmed (IA) @<a href = "https://www.khanacademy.org/profile/ibraheemia">IbraheemIA</a> &mdash; His syntax highlighter served as a reference point for mine.  Found at <a href = "https://www.khanacadmey.org/cs/i/6526594857353216"></a></li>
+        <li>Nick Berry &mdash; He is the creator of datagenetics.com, which is where I discovered the Battleship AI.  Found at <a href = "https://www.datagenetics.com/blog/december32011/">www.datagenetics.com/blog/december32011/</a>  Be advised that the link leads to another site.</li>
+        
+      </ul>
+      <h3>A Note to the Judges:</h3>
+      <p>Currently, my program outsources several large scripts to a PJS program on Khan Academy.  Those scripts were written for the contest, and are a major part of my entry.  You will find them at these links:</p>
+      <ul>
+        <li><a href = "https://www.khanacademy.org/cs/i/4554512221126656">/cs/i/4554512221126656</a> &mdash; The syntax highlighter used for the example code.</li>
+        <li><a href = "https://www.khanacademy.org/cs/i/4870165490614272">/cs/i/4554512221126656</a> &mdash; A library that handles the event listeners & animation for the interactives.</li>
+        <li><a href = "https://www.khanacademy.org/cs/i/5706003536461824">/cs/i/4554512221126656</a> &mdash; The actual demonstrations & visualizations (2000+ lines of code!)</li>
+      </ul>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "arrow-right" href = "javascript:goto(14);">Next</a>
+      </div>
+    </article>
+    <!-- 
+      This page is unimportant.  
+      Don't bother looking in here.
+    -->
+    <article class = "page">
+      <h1>Hello, world!</h1>
+      <!-- Navigation links -->
+      <div class = "nav-arrow-wrapper">
+        <a class = "home-left" href = "javascript:goto(0);">Home</a>
+        <a class = "home-right" href = "javascript:goto(0);">Home</a>
+      </div>
+      <p>Hooray!  You found the Easter Egg!</p>
+    </article>
+    
+    <!-- 
+      The footer.  Contains a link to my profile,
+      and my logo.
+    -->
+    <footer>
+      <p id = "footer-text">All code written by @<a href="https://www.khanacademy.org/profile/hsstudent16">HSstudent16</a>, unless otherwise noted.</p>
+      <!-- The logo is the thumbnail of another program -->
+      <img id = "logo" src = "https://www.khanacademy.org/computer-programming/new-program/5492391638810624/latest.png">
+    </footer>
+    
+    <!-- The big blue welcome screen -->
+    <div id = "welcome-overlay">
+      <!-- Title and subtitle -->
+      <div id = "title-wrapper">
+        <h1>Algorithms for Games</h1>
+        <h3>As seen on Khan Academy</h3>
+      </div>
+      <!-- 
+        Button and Sub button.
+        Actually it's the new tab button
+      -->
+      <div>
+        <a href = "javascript:launch();" id = "begin" >Explore</a><a href = "javascript:alert('Old stuff');" id = "new-tab" >An old fullscreen button :P</a>
+      </div>
+    </div>
+
+
+    <!-- Page management, sticky nav, and new tabs -->
+    <script src = "highlighter.js"></script>
+    <script src = "mylib.js"></script>
+    <script src = "main.js"></script>
+    <script>
+      document.get = function (a) {
+        return document.querySelector(a);
+      };
+    
+      // Which page are we on?
+      var currentPage = -1,
+      // What are all the pages?
+        pages = document.querySelectorAll("article.page"),
+      // What is the "nav"?
+        nav   = document.get("#top-nav"),
+      // How high is the "nav"?
+        navTop = nav.offsetTop,
+      // The code for this program.
+        importStuff;
+        
+      
+      
+      /*
+        Changes pages
+      */
+      function goto (page) {
+        // Don't change if it won't do something
+        if (page === currentPage) {
+          return;
+        }
+
+        // Don't go somewhere that does not exist
+        if (page < 0 || page >= pages.length) {
+          return alert ("That pages does not exist.");
+        }
+
+        // Leave the previous page
+        if (currentPage >= 0) {
+          pages[currentPage].classList.remove("active")
+        }
+
+        // Go to the current page
+        currentPage = page;
+        pages[currentPage].classList.add("active");
+        document.scrollingElement.scrollTo(0, 0);
+      }
+
+      /*
+        Hides the welcome screen and goes to the
+        first page
+      */
+      function launch () {
+        let scr = document.get("#welcome-overlay");
+        scr.style.opacity = "0";
+        scr.style.visibility = "hidden";
+        goto(0);
+      }
+
+      /*
+        The callback property takes a function.
+        This function works similar to `api`, but
+        only stores code instead of running it.
+      */
+      function apiFetch (e) {
+        importStuff = e.revision.code;
+      }
+
+      /*
+        Launches the program in a new tab.
+      */
+      function launchInNewTab () {
+
+        
+      }
+
+      /*
+        Makes the nav bar sticky!
+      */
+      document.onscroll = function () {
+        // Ignore this if the welcome screen is
+        // still present.
+        if (currentPage < 0) {
+          return;
+        }
+
+        // How much has the user scrolled?
+        let scrollAmt = (
+          document.documentElement.scrollTop ||
+          document.scrollTop
+        );
+
+        // If the nav bar would ordinarily be offscreen,
+        // make it sticky.
+        if (scrollAmt >= navTop) {
+          nav.classList.add("sticky");
+          pages[currentPage].style.marginTop = 8+nav.clientHeight + "px";
+        
+        // Otherwise, put it back "under" the header.
+        } else {
+          nav.classList.remove("sticky");
+          pages[currentPage].style.marginTop = "8px";
+        }
+      };
+    </script>
+    
+  </body>
+</html>
